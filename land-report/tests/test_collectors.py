@@ -76,7 +76,6 @@ class LandTest(unittest.TestCase):
     def test_resolves_pnu_by_search_and_saves_three_datasets(self):
         def fake(url):
             if "req/search" in url:
-                lot = "408-5" if "408-5" in url or "408-5".replace("-", "%2D") in url else None
                 return {"response": {"result": {"items": [
                     {"id": "5213012345104080005", "address": {"parcel": "신관동 408-5"}},
                     {"id": "5213012345104090003", "address": {"parcel": "신관동 409-3"}},
@@ -88,7 +87,7 @@ class LandTest(unittest.TestCase):
         s = settings(vworld="k")
         s.region["bjd_code"] = ""
         r = land.collect(s, Store(Path(tempfile.mkdtemp())), fetch=fake)
-        self.assertEqual(len(r.saved), 5 * 3)
+        self.assertEqual(len(r.saved), 5 * 4)  # 3개 데이터셋 + 좌표
         self.assertEqual(r.failed, [])
 
 

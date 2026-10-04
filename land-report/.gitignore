@@ -4,3 +4,4 @@ data/index.sqlite
 data/manual/*
 !data/manual/README.md
 __pycache__/
+data/analysis/

@@ -31,6 +31,8 @@ class Settings:
     assumptions: dict
     sources: dict
     keys: dict = field(default_factory=dict)
+    inheritance: dict = field(default_factory=dict)
+    sites: list[dict] = field(default_factory=list)
 
     @property
     def address_prefix(self) -> str:
@@ -61,6 +63,8 @@ def load_settings(config_dir: Path = CONFIG_DIR) -> Settings:
         parcels=[Parcel(**x) for x in p["parcels"]],
         assumptions=p.get("assumptions", {}),
         sources=s,
+        inheritance=p.get("inheritance", {}),
+        sites=p.get("sites", []),
         keys={
             "law_oc": os.environ.get("LAW_OC", ""),
             "vworld": os.environ.get("VWORLD_KEY", ""),

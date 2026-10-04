@@ -67,6 +67,11 @@ class Store:
         self.db.commit()
         return doc_id
 
+    def documents(self, source: str) -> list[dict]:
+        """저장된 원자료 봉투(envelope) 목록. payload 포함."""
+        rows = self.db.execute("SELECT path FROM documents WHERE source = ? ORDER BY doc_id", (source,))
+        return [json.loads((self.raw_dir.parent / path).read_text(encoding="utf-8")) for (path,) in rows]
+
     def error(self, *, source: str, title: str, url: str, error: str) -> None:
         now = datetime.now(timezone.utc).isoformat(timespec="seconds")
         self.db.execute("INSERT INTO errors VALUES (?,?,?,?,?)", (source, title, redact(url), error, now))

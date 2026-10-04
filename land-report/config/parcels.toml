@@ -56,3 +56,18 @@ pnu = ""
 target_sale_total = 1_100_000_000   # 11억 양도 가정
 self_farming_relief = true          # 자경농지 요건 충족 전제(피상속인 경작기간 승계)
 sell_within_years_of_inheritance = 3
+
+[inheritance]
+# 상속개시일(피상속인 사망일, YYYY-MM-DD). 6개월 평가기간·3년 자경 승계·5년 비사업용 예외 기한 계산에 쓴다.
+date = ""
+# 양도세 시나리오에서 비교할 상속인 수(사용자 표: 4인·3인·1인)
+heir_scenarios = [4, 3, 1]
+
+# 개발 호재 지점. 좌표와 출처는 1차 자료(보도자료·고시)로 확인한 뒤 verified = true 로 바꾼다.
+# 확인되지 않은 지점은 거리 계산에 쓰지 않는다.
+# [[sites]]
+# name = "현대차 새만금 AI 데이터센터"
+# lat = 0.0
+# lon = 0.0
+# source = "보도자료_현대자동차_YYYYMMDD.pdf"
+# verified = false

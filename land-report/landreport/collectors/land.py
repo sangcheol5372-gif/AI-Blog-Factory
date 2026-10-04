@@ -9,6 +9,7 @@ from . import Result
 
 NED = "https://api.vworld.kr/ned/data"
 SEARCH = "https://api.vworld.kr/req/search"
+GEOCODE = "https://api.vworld.kr/req/address"
 
 DATASETS = {
     "land_use": ("getLandUseAttr", "토지이용계획"),
@@ -70,4 +71,18 @@ def collect(settings, store, fetch=get_json) -> Result:
             except Exception as e:
                 store.error(source="land", title=title, url=url, error=repr(e))
                 res.failed.append(f"{parcel.lot}:{ds}")
+        # 호재 지점과의 거리 계산용 좌표(WGS84)
+        url = build_url(GEOCODE, {
+            "service": "address", "request": "getcoord", "type": "parcel", "crs": "epsg:4326",
+            "address": f"{settings.address_prefix} {parcel.lot}", "format": "json", "key": key,
+        })
+        try:
+            res.saved.append(store.save(
+                source="land", key=f"{parcel.lot}-coord", title=f"신관동 {parcel.lot} 좌표", url=url,
+                reliability="primary", payload=fetch(url),
+                meta={"lot": parcel.lot, "pnu": pnu, "dataset": "coord"},
+            ))
+        except Exception as e:
+            store.error(source="land", title=f"{parcel.lot} 좌표", url=url, error=repr(e))
+            res.failed.append(f"{parcel.lot}:coord")
     return res
