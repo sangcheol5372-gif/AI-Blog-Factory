@@ -3,6 +3,7 @@
     python -m landreport collect news law   # 일부만
     python -m landreport status             # 수집 현황·최근 오류
     python -m landreport analyze            # 2단계 분석 → data/analysis/analysis.{json,md}
+    python -m landreport draft              # 3단계 실무자 초안 → data/reports/vN/draft.md
 """
 import argparse
 
@@ -27,6 +28,7 @@ def main(argv=None) -> None:
     c.add_argument("only", nargs="*", help=f"수집할 종류: {', '.join(COLLECTORS)} (생략 시 전체)")
     sub.add_parser("status", help="수집 현황")
     sub.add_parser("analyze", help="2단계 분석")
+    sub.add_parser("draft", help="3단계 실무자 초안(직전 버전이 반려됐으면 수정본)")
     args = ap.parse_args(argv)
 
     unknown = set(getattr(args, "only", [])) - set(COLLECTORS)
@@ -40,6 +42,17 @@ def main(argv=None) -> None:
         print(f"분석 완료: {md}\n데이터 공백 {len(a['gaps'])}건")
         for g in a["gaps"]:
             print("  -", g)
+        return
+    if args.cmd == "draft":
+        from .report import checks, pipeline
+        from .report.llm import LLMError
+        a = build.build(load_settings(), store)
+        build.write(a, DATA_DIR / "analysis")
+        try:
+            out = pipeline.run_draft(a, checks.catalog(a, store), DATA_DIR / "reports")
+        except LLMError as e:
+            ap.exit(1, f"초안 작성 실패: {e}\n")
+        print(f"초안 작성 완료: {out / 'draft.md'}")
         return
     if args.cmd == "collect":
         settings = load_settings()

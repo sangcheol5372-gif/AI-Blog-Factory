@@ -1,7 +1,7 @@
 # 군산 신관동 토지 매각 보고서 파이프라인
 
 ```
-[1] 자료수집 ✅  →  [2] 분석 ✅  →  [3] 기초 용역보고서(실무자)  →  [4] 과장 검토  →  [5] 부장 검토 → 제출
+[1] 자료수집 ✅  →  [2] 분석 ✅  →  [3] 기초 용역보고서(실무자) ✅  →  [4] 과장 검토  →  [5] 부장 검토 → 제출
 ```
 
 ## 대상 필지 (전북 군산시 신관동, 도시지역/자연녹지)
@@ -28,9 +28,10 @@ python3 -m landreport collect            # 전체
 python3 -m landreport collect news law   # 일부
 python3 -m landreport status
 python3 -m landreport analyze            # 2단계 분석
+python3 -m landreport draft              # 3단계 실무자 초안 (ANTHROPIC_API_KEY 필요)
 python3 -m unittest discover -s tests -t .
 ```
-Python 3.11 이상, 외부 패키지 없음. 결과는 `data/raw/<종류>/*.json`(출처 URL·수집시각·해시 포함)과 `data/index.sqlite` 에 저장됩니다. API 키는 저장할 때 `***` 로 가려집니다.
+Python 3.11 이상. 1·2단계는 외부 패키지 없음, 3단계부터 `pip install -r requirements.txt`. 결과는 `data/raw/<종류>/*.json`(출처 URL·수집시각·해시 포함)과 `data/index.sqlite` 에 저장됩니다. API 키는 저장할 때 `***` 로 가려집니다.
 
 ## 2단계: 분석
 
@@ -49,3 +50,17 @@ Python 3.11 이상, 외부 패키지 없음. 결과는 `data/raw/<종류>/*.json
 | 데이터 공백 | 자료가 없어 판단을 보류한 항목 — 추정으로 채우지 않음 |
 
 양도세는 간이 추정입니다. 사용자 표의 세액과 차이가 있으므로 실제 매도 전 세무사 확인이 필요합니다.
+
+## 3단계: 기초 용역보고서 (실무자)
+
+`python3 -m landreport draft` → `data/reports/vN/draft.md` (+ `draft.json`, `checks.json`)
+
+- Claude API(`claude-opus-5-5`)가 2단계 분석 결과와 근거 목록만 보고 내부용 보고서를 씁니다.
+  거절 시 서버가 권장 모델로 자동 재시도합니다(`fallbacks: "default"`).
+- 9개 장: 개요 / 필지 현황 / 입지와 개발 여건 / 법적 규제와 활용 가능성 / 시세 분석과 적정 매도가 범위 /
+  매도 전략 / 세후 수령액 시나리오 / 리스크와 매수자 고지 사항 / 데이터 공백과 추가 조사
+- 모든 문단에 성격(사실·추정·의견)과 근거 ID 가 붙고, Markdown 에는 각주로 표시됩니다.
+- 작성 직후 기계 점검(`checks.json`)이 돕니다. 이 결과는 4·5단계 검토자에게 그대로 넘어갑니다.
+  - 차단: 필수 장 누락, 근거 없는 사실, 존재하지 않는 근거, 뉴스만으로 사실 단정, 과장 표현('보장', '확정', '무조건' 등)
+  - 확인 필요: 분석 결과에서 찾을 수 없는 금액
+- 직전 버전이 과장·부장에게 반려됐으면, 그 의견을 반영한 수정본을 다음 버전으로 씁니다.

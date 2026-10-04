@@ -132,3 +132,15 @@ class ManualTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EnvTest(unittest.TestCase):
+    def test_inline_comments_are_not_values(self):
+        import os
+        from landreport.config import load_env
+        f = Path(tempfile.mkdtemp()) / ".env"
+        f.write_text("LR_T1=          # 설명\nLR_T2=abc  # 설명\nLR_T3=\"q\"\n")
+        for k in ("LR_T1", "LR_T2", "LR_T3"):
+            os.environ.pop(k, None)
+        load_env(f)
+        self.assertEqual((os.environ["LR_T1"], os.environ["LR_T2"], os.environ["LR_T3"]), ("", "abc", "q"))

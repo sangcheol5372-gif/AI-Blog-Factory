@@ -49,7 +49,12 @@ def load_env(path: Path) -> None:
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, v = line.split("=", 1)
-        os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        v = v.strip()
+        if v.startswith("#"):
+            v = ""
+        elif " #" in v:  # 줄 끝 주석
+            v = v.split(" #", 1)[0].strip()
+        os.environ.setdefault(k.strip(), v.strip('"').strip("'"))
 
 
 def load_settings(config_dir: Path = CONFIG_DIR) -> Settings:
